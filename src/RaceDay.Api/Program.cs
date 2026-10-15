@@ -53,15 +53,18 @@ builder.Services
 // 5. Configure role-based authorisation
 builder.Services.AddAuthorization();
 
-// 6. Configure OpenAPI
+// 6. Configure OpenAPI and Swagger
 builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// 7. Enable OpenAPI in development
+// 7. Enable API documentation in development
 if (app.Environment.IsDevelopment())
 {
 	app.MapOpenApi();
+	app.UseSwagger();
+	app.UseSwaggerUI();
 }
 
 // 8. Configure middleware

@@ -1,0 +1,21 @@
+# .NET generated files
+**/bin/
+**/obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Test results
+TestResults/
+*.trx
+
+# Local settings and secrets
+.env
+.env.*
+**/appsettings.Local.json
+
+# Operating system
+Thumbs.db
+.DS_Store

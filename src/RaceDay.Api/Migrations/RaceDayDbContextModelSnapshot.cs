@@ -106,7 +106,7 @@ namespace RaceDay.Api.Migrations
                         .HasColumnType("decimal(10,2)");
 
                     b.Property<DateTime>("EventDate")
-                        .HasColumnType("date");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("EventName")
                         .IsRequired()

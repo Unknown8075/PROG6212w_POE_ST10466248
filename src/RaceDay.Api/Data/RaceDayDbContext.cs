@@ -40,13 +40,13 @@ public class RaceDayDbContext : DbContext
                 .HasForeignKey(e => e.OrganiserID)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            entity.Property(e => e.EventDate)
-                .HasColumnType("date");
+			entity.Property(e => e.EventDate)
+	            .HasColumnType("datetime2");
 
-            entity.Property(e => e.DateCreated)
-                .HasDefaultValueSql("GETDATE()");
+			entity.Property(e => e.DateCreated)
+				.HasDefaultValueSql("GETDATE()");
 
-            entity.ToTable(t => t.HasCheckConstraint(
+			entity.ToTable(t => t.HasCheckConstraint(
                 "CK_Events_EventType",
                 "[EventType] IN ('Run', 'Walk', 'Cycle')"));
 

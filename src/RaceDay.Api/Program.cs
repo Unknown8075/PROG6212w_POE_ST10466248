@@ -1,48 +1,76 @@
+
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RaceDay.Api.Data;
+using RaceDay.Api.Models;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// 1. Configure SQL Server database
 var connectionString = builder.Configuration
 	.GetConnectionString("RaceDayConnection");
 
 builder.Services.AddDbContext<RaceDayDbContext>(options =>
 	options.UseSqlServer(connectionString));
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+// 2. Register API controllers
+builder.Services.AddControllers();
+
+// 3. Configure secure password hashing
+builder.Services.AddScoped<
+	IPasswordHasher<User>,
+	PasswordHasher<User>>();
+
+// 4. Configure cookie-based authentication
+builder.Services
+	.AddAuthentication(
+		CookieAuthenticationDefaults.AuthenticationScheme)
+	.AddCookie(options =>
+	{
+		options.Cookie.Name = "RaceDay.Auth";
+		options.Cookie.HttpOnly = true;
+		options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+		options.Cookie.SameSite = SameSiteMode.Strict;
+
+		options.ExpireTimeSpan = TimeSpan.FromHours(2);
+		options.SlidingExpiration = true;
+
+		// Return HTTP status codes instead of redirects
+		options.Events.OnRedirectToLogin = context =>
+		{
+			context.Response.StatusCode = 401;
+			return Task.CompletedTask;
+		};
+
+		options.Events.OnRedirectToAccessDenied = context =>
+		{
+			context.Response.StatusCode = 403;
+			return Task.CompletedTask;
+		};
+	});
+
+// 5. Configure role-based authorisation
+builder.Services.AddAuthorization();
+
+// 6. Configure OpenAPI
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// 7. Enable OpenAPI in development
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+	app.MapOpenApi();
 }
 
+// 8. Configure middleware
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+app.UseAuthentication();
+app.UseAuthorization();
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+// 9. Map controller endpoints
+app.MapControllers();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

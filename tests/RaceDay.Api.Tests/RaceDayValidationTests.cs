@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using RaceDay.Api.Data;
 using RaceDay.Api.DTOs;
@@ -37,7 +39,7 @@ public class RaceDayValidationTests
 	{
 		var request = new EnrolmentRequest
 		{
-			EventCategoryID = 0
+			EventCategoryID = 0	
 		};
 
 		Assert.False(IsValid(request));
@@ -129,8 +131,8 @@ public class RaceDayValidationTests
 	{
 		using var context = CreateContext();
 
-		var entityType = context.Model
-			.FindEntityType(typeof(EventCategory));
+		var entityType = GetDesignTimeEntityType(
+		context, typeof(EventCategory));
 
 		Assert.NotNull(entityType);
 
@@ -146,8 +148,8 @@ public class RaceDayValidationTests
 	{
 		using var context = CreateContext();
 
-		var entityType = context.Model
-			.FindEntityType(typeof(Enrolment));
+		var entityType = GetDesignTimeEntityType(
+			context, typeof(Enrolment));
 
 		Assert.NotNull(entityType);
 
@@ -164,8 +166,8 @@ public class RaceDayValidationTests
 	{
 		using var context = CreateContext();
 
-		var entityType = context.Model
-			.FindEntityType(typeof(Result));
+		var entityType = GetDesignTimeEntityType(
+			context, typeof(Result));
 
 		Assert.NotNull(entityType);
 
@@ -177,6 +179,21 @@ public class RaceDayValidationTests
 				constraint.Sql.Contains("DNS") &&
 				constraint.Sql.Contains("DQ"));
 	}
+
+
+	private static IEntityType GetDesignTimeEntityType(
+		RaceDayDbContext context,
+		Type entityType)
+	{
+		var designTimeModel = context
+			.GetService<IDesignTimeModel>()
+			.Model;
+
+		return designTimeModel.FindEntityType(entityType)
+			?? throw new InvalidOperationException(
+				$"Entity type {entityType.Name} was not found.");
+	}
+
 
 	private static RaceDayDbContext CreateContext()
 	{

@@ -58,6 +58,14 @@
                                     Organiser Dashboard
                                 </a>
                             </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Events"
+                                   asp-action="Index">
+                                    Manage Events
+                                </a>
+                            </li>
                         }
 
                         @if (User.IsInRole("Participant"))

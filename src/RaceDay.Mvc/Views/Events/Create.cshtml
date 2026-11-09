@@ -1,0 +1,25 @@
+﻿@model RaceDay.Mvc.ViewModels.EventFormViewModel
+
+@{
+    ViewData["Title"] = "Create Event";
+}
+
+<div class="container py-4">
+    <h1 class="fw-bold">Create New Event</h1>
+    <p class="text-muted">
+        Add a new sporting event to RaceDay.
+    </p>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <partial name="_EventForm" model="Model" />
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

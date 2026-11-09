@@ -1,0 +1,42 @@
+﻿@model RaceDay.Mvc.Models.RaceEvent
+
+@{
+    ViewData["Title"] = "Event Details";
+}
+
+<div class="container py-4">
+    <h1 class="fw-bold">@Model.EventName</h1>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <p>@Model.Description</p>
+
+            <dl class="row">
+                <dt class="col-sm-4">Event Date</dt>
+                <dd class="col-sm-8">
+                    @Model.EventDate.ToString("dd MMM yyyy HH:mm")
+                </dd>
+
+                <dt class="col-sm-4">Location</dt>
+                <dd class="col-sm-8">@Model.Location</dd>
+
+                <dt class="col-sm-4">Distance</dt>
+                <dd class="col-sm-8">@Model.Distance km</dd>
+
+                <dt class="col-sm-4">Event Type</dt>
+                <dd class="col-sm-8">@Model.EventType</dd>
+            </dl>
+
+            <a asp-action="Edit"
+               asp-route-id="@Model.EventID"
+               class="btn btn-primary">
+                Edit Event
+            </a>
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary">
+                Back to Events
+            </a>
+        </div>
+    </div>
+</div>

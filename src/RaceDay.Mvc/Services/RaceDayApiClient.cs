@@ -18,6 +18,26 @@ public sealed class RaceDayApiClient
 		_accessor = accessor;
 	}
 
+	public async Task<HttpResponseMessage> PutAsync<T>(
+		string endpoint, T data)
+	{
+		using var request = new HttpRequestMessage(
+			HttpMethod.Put, endpoint);
+
+		request.Content = JsonContent.Create(data);
+
+		return await SendAsync(request);
+	}
+
+	public async Task<HttpResponseMessage> DeleteAsync(
+		string endpoint)
+	{
+		using var request = new HttpRequestMessage(
+			HttpMethod.Delete, endpoint);
+
+		return await SendAsync(request);
+	}
+
 	public async Task<HttpResponseMessage> PostAsync<T>(
 		string endpoint, T data)
 	{
@@ -74,7 +94,6 @@ public sealed class RaceDayApiClient
 				"RaceDay.Auth=", StringComparison.Ordinal))
 				return firstPart;
 		}
-
 		return null;
 	}
 }

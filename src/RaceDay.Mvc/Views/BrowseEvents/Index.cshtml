@@ -1,0 +1,70 @@
+@model List<RaceDay.Mvc.Models.RaceEvent>
+
+@{
+    ViewData["Title"] = "Browse Events";
+}
+
+<div class="container py-4">
+    <h1 class="fw-bold">Upcoming Race Events</h1>
+    <p class="text-muted">Find your next challenge.</p>
+
+    <form method="get" class="row g-2 mb-4">
+        <div class="col-md-6">
+            <input name="search" value="@ViewBag.Search"
+                   class="form-control"
+                   placeholder="Search events or locations" />
+        </div>
+        <div class="col-md-3">
+            <select name="type" class="form-select">
+                <option value="">All Event Types</option>
+                @foreach (var type in new[] { "Run", "Walk", "Cycle" })
+                {
+                    <option value="@type"
+                            selected="@(ViewBag.Type == type)">
+                        @type
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-primary w-100">Search</button>
+        </div>
+    </form>
+
+    <div class="row g-3">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h4>@item.EventName</h4>
+                        <p>@item.Description</p>
+                        <p>
+                            <strong>Date:</strong>
+                            @item.EventDate.ToString("dd MMM yyyy")
+                        </p>
+                        <p>
+                            <strong>Location:</strong> @item.Location
+                        </p>
+                        <p>
+                            <strong>Distance:</strong> @item.Distance km
+                        </p>
+                        <a asp-action="Details"
+                           asp-route-id="@item.EventID"
+                           class="btn btn-primary">
+                            View &amp; Register
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            No upcoming events match your search.
+        </div>
+    }
+</div>
+    

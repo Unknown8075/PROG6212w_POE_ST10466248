@@ -1,0 +1,63 @@
+@model RaceDay.Mvc.ViewModels.EventCategoryFormViewModel
+
+@{
+    ViewData["Title"] = "Assign Category";
+}
+
+<div class="container py-4">
+    <h1>Assign Category</h1>
+
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <input asp-for="EventID" type="hidden" />
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="CategoryID" class="form-label">
+                Category
+            </label>
+
+            <select asp-for="CategoryID"
+                    asp-items="Model.Categories"
+                    class="form-select">
+                <option value="0">Select a category</option>
+            </select>
+
+            <span asp-validation-for="CategoryID"
+                  class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="EntryFee" class="form-label"></label>
+            <input asp-for="EntryFee"
+                   class="form-control"
+                   type="text" />
+            <span asp-validation-for="EntryFee"
+                  class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="MaximumParticipants"
+                   class="form-label"></label>
+            <input asp-for="MaximumParticipants"
+                   class="form-control" />
+            <span asp-validation-for="MaximumParticipants"
+                  class="text-danger"></span>
+        </div>
+
+        <button class="btn btn-primary">Assign Category</button>
+
+        <a asp-action="Index"
+           asp-route-eventId="@Model.EventID"
+           class="btn btn-outline-secondary">
+            Cancel
+        </a>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

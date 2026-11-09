@@ -1,0 +1,66 @@
+@model List<RaceDay.Mvc.Models.RaceEventCategory>
+
+@{
+    ViewData["Title"] = "Event Categories";
+    int eventId = (int)ViewBag.EventID;
+}
+
+<div class="container py-4">
+    <h1>Event Categories</h1>
+
+    <a asp-action="Create"
+       asp-route-eventId="@eventId"
+       class="btn btn-primary mb-3">
+        + Assign Category
+    </a>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Entry Fee</th>
+                <th>Capacity</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.CategoryName</td>
+                    <td>@item.EntryFee.ToString("C")</td>
+                    <td>@item.MaximumParticipants</td>
+                    <td>
+                        <form asp-action="Delete" method="post"
+                              onsubmit="return confirm('Remove category?');">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="eventId"
+                                   value="@eventId" />
+                            <input type="hidden" name="eventCategoryId"
+                                   value="@item.EventCategoryID" />
+                            <button class="btn btn-sm btn-outline-danger">
+                                Remove
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <a asp-controller="Events"
+       asp-action="Index"
+       class="btn btn-outline-secondary">
+        Back to Events
+    </a>
+</div>

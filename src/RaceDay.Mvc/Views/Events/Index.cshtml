@@ -77,6 +77,12 @@
                                                class="btn btn-sm btn-outline-secondary">
                                                 Edit
                                             </a>
+                                            <a asp-controller="EventCategories"
+                                               asp-action="Index"
+                                               asp-route-eventId="@item.EventID"
+                                               class="btn btn-sm btn-outline-success">
+                                                Categories
+                                            </a>
 
                                             <form asp-action="Delete"
                                                   asp-route-id="@item.EventID"

@@ -32,10 +32,11 @@ public class ImagesController : ControllerBase
 
 	[HttpPost("events/{eventId:int}/banner")]
 	[Authorize(Roles = "Organiser")]
+	[Consumes("multipart/form-data")]
 	[RequestSizeLimit(6 * 1024 * 1024)]
 	public async Task<IActionResult> UploadEventBanner(
 		int eventId,
-		[FromForm] IFormFile file)
+		IFormFile file)
 	{
 		var raceEvent = await _db.Events
 			.FirstOrDefaultAsync(e => e.EventID == eventId);
@@ -67,10 +68,18 @@ public class ImagesController : ControllerBase
 		{
 			return BadRequest(new { message = ex.Message });
 		}
-		catch (RequestFailedException)
+
+		catch (RequestFailedException ex)
 		{
-			return StatusCode(503,
-				new { message = "Image storage is unavailable." });
+			Console.WriteLine(
+				$"AZURITE EVENT ERROR: Status={ex.Status}, " +
+				$"Code={ex.ErrorCode}, " +
+				$"Message={ex.Message}");
+
+			return StatusCode(503, new
+			{
+				message = "Image storage is unavailable."
+			});
 		}
 	}
 
@@ -108,9 +117,10 @@ public class ImagesController : ControllerBase
 
 	[HttpPost("profile/picture")]
 	[Authorize(Roles = "Participant")]
+	[Consumes("multipart/form-data")]
 	[RequestSizeLimit(6 * 1024 * 1024)]
 	public async Task<IActionResult> UploadProfilePicture(
-		[FromForm] IFormFile file)
+	IFormFile file)
 	{
 		var user = await _db.Users
 			.FirstOrDefaultAsync(u => u.UserID == CurrentUserId);
@@ -138,10 +148,18 @@ public class ImagesController : ControllerBase
 		{
 			return BadRequest(new { message = ex.Message });
 		}
-		catch (RequestFailedException)
+
+		catch (RequestFailedException ex)
 		{
-			return StatusCode(503,
-				new { message = "Image storage is unavailable." });
+			Console.WriteLine(
+				$"AZURITE PROFILE ERROR: Status={ex.Status}, " +
+				$"Code={ex.ErrorCode}, " +
+				$"Message={ex.Message}");
+
+			return StatusCode(503, new
+			{
+				message = "Image storage is unavailable."
+			});
 		}
 	}
 

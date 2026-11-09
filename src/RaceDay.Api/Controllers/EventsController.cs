@@ -27,18 +27,19 @@ public class EventsController : ControllerBase
         var events = await _context.Events
             .AsNoTracking()
             .OrderBy(e => e.EventDate)
-            .Select(e => new
-            {
-                e.EventID,
-                e.EventName,
-                e.Description,
-                e.EventDate,
-                e.Location,
-                e.Distance,
-                e.EventType,
-                e.OrganiserID
-            })
-            .ToListAsync();
+		.Select(e => new
+		{
+			e.EventID,
+			e.EventName,
+			e.Description,
+			e.EventDate,
+			e.Location,
+			e.Distance,
+			e.EventType,
+			e.OrganiserID,
+			e.BannerImageUrl
+		})
+			.ToListAsync();
 
         return Ok(events);
     }

@@ -25,6 +25,68 @@
         </div>
     }
 
+    <!-- PROFILE PICTURE -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-dark text-white">
+            Profile Picture
+        </div>
+
+        <div class="card-body">
+            <p class="text-muted">
+                Upload a JPG, PNG or WEBP image.
+                Maximum file size: 5 MB.
+            </p>
+
+            @if (!string.IsNullOrWhiteSpace(Model.ProfilePictureUrl))
+            {
+                <div class="mb-4 text-center">
+                    <img src="@Url.Action("Picture", "Profile")"
+                         alt="My profile picture"
+                         class="rounded-circle border shadow-sm"
+                         style="width:160px;height:160px;object-fit:cover;" />
+
+                    <p class="text-success mt-2">
+                        Profile picture configured.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-secondary">
+                    No profile picture uploaded yet.
+                </div>
+            }
+
+            <form asp-controller="Profile"
+                  asp-action="UploadPicture"
+                  method="post"
+                  enctype="multipart/form-data">
+
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label for="profilePicture"
+                           class="form-label">
+                        Choose Profile Picture
+                    </label>
+
+                    <input type="file"
+                           id="profilePicture"
+                           name="file"
+                           class="form-control"
+                           accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                           required />
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary">
+                    Upload Profile Picture
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PERSONAL INFORMATION -->
     <div class="card shadow-sm mt-4">
         <div class="card-header bg-dark text-white">
             Personal Information

@@ -68,6 +68,81 @@ public class ProfileController : Controller
 		}
 	}
 
+
+	[HttpPost]
+	[ValidateAntiForgeryToken]
+	[RequestSizeLimit(6 * 1024 * 1024)]
+	public async Task<IActionResult> UploadPicture(IFormFile? file)
+	{
+		if (file == null || file.Length == 0)
+		{
+			TempData["Error"] = "Please select a profile picture.";
+			return RedirectToAction(nameof(Index));
+		}
+
+		if (file.Length > 5 * 1024 * 1024)
+		{
+			TempData["Error"] = "Profile picture must be 5 MB or smaller.";
+			return RedirectToAction(nameof(Index));
+		}
+
+		var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+		var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+		if (!allowedExtensions.Contains(extension))
+		{
+			TempData["Error"] = "Only JPG, PNG and WEBP images are supported.";
+			return RedirectToAction(nameof(Index));
+		}
+
+		try
+		{
+			using var form = new MultipartFormDataContent();
+			await using var stream = file.OpenReadStream();
+
+			using var fileContent = new StreamContent(stream);
+
+			fileContent.Headers.ContentType =
+				new System.Net.Http.Headers.MediaTypeHeaderValue(
+					file.ContentType);
+
+			form.Add(fileContent, "file", Path.GetFileName(file.FileName));
+
+			using var request = new HttpRequestMessage(
+				HttpMethod.Post,
+				"api/images/profile/picture")
+			{
+				Content = form
+			};
+
+			using var response = await _api.SendAsync(request);
+
+			if (!response.IsSuccessStatusCode)
+			{
+				if (response.StatusCode == HttpStatusCode.Unauthorized ||
+					response.StatusCode == HttpStatusCode.Forbidden)
+				{
+					return await ApiFailure(response);
+				}
+
+				TempData["Error"] =
+					"Profile picture upload failed. Check that Azurite is running.";
+
+				return RedirectToAction(nameof(Index));
+			}
+
+			TempData["Success"] = "Profile picture uploaded successfully.";
+
+			return RedirectToAction(nameof(Index));
+		}
+		catch (HttpRequestException)
+		{
+			TempData["Error"] = "RaceDay API is unavailable.";
+			return RedirectToAction(nameof(Index));
+		}
+	}
+
+
 	[HttpPost]
 	[ValidateAntiForgeryToken]
 	public async Task<IActionResult> Index(ProfileViewModel model)
@@ -146,6 +221,44 @@ public class ProfileController : Controller
 				"", "RaceDay API is unavailable.");
 
 			return View(model);
+		}
+	}
+
+	[HttpGet]
+	public async Task<IActionResult> Picture()
+	{
+		try
+		{
+			using var response =
+				await _api.GetAsync("api/images/profile/picture");
+
+			if (response.StatusCode == HttpStatusCode.NotFound)
+				return NotFound();
+
+			if (response.StatusCode == HttpStatusCode.Unauthorized)
+				return Unauthorized();
+
+			if (response.StatusCode == HttpStatusCode.Forbidden)
+				return Forbid();
+
+			if (!response.IsSuccessStatusCode)
+				return StatusCode((int)response.StatusCode);
+
+			var contentType =
+				response.Content.Headers.ContentType?.MediaType;
+
+			if (contentType != "image/jpeg" &&
+				contentType != "image/png" &&
+				contentType != "image/webp")
+				return StatusCode(502);
+
+			var bytes = await response.Content.ReadAsByteArrayAsync();
+
+			return File(bytes, contentType);
+		}
+		catch (HttpRequestException)
+		{
+			return StatusCode(503);
 		}
 	}
 }

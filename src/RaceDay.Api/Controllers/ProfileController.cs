@@ -34,16 +34,17 @@ public class ProfileController : ControllerBase
         var user = await _context.Users
             .AsNoTracking()
             .Where(u => u.UserID == userId)
-            .Select(u => new
-            {
-                u.UserID,
-                u.FirstName,
-                u.LastName,
-                u.Email,
-                u.Role,
-                u.DateCreated
-            })
-            .FirstOrDefaultAsync();
+		 .Select(u => new
+		 {
+			 u.UserID,
+			 u.FirstName,
+			 u.LastName,
+			 u.Email,
+			 u.Role,
+			 u.DateCreated,
+			 u.ProfilePictureUrl
+		 })
+			.FirstOrDefaultAsync();
 
         if (user == null)
         {

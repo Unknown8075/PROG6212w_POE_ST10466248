@@ -3,6 +3,7 @@ namespace RaceDay.Mvc.Models;
 
 public class RaceEvent
 {
+	public string? BannerImageUrl { get; set; }
 	public int EventID { get; set; }
 	public string EventName { get; set; } = "";
 	public string Description { get; set; } = "";

@@ -16,7 +16,7 @@ public class ProfileViewModel
 	[StringLength(50)]
 	[Display(Name = "Last Name")]
 	public string LastName { get; set; } = string.Empty;
-
+	public string? ProfilePictureUrl { get; set; }
 	public string Email { get; set; } = string.Empty;
 
 	public string Role { get; set; } = string.Empty;

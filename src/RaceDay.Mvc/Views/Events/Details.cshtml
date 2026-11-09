@@ -5,9 +5,32 @@
 }
 
 <div class="container py-4">
-    <h1 class="fw-bold">@Model.EventName</h1>
 
-    <div class="card border-0 shadow-sm">
+    <h1 class="fw-bold">@Model.EventName</h1>
+    <p class="text-muted">
+        View and manage your RaceDay event.
+    </p>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
+
+    <!-- EVENT DETAILS -->
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-dark text-white">
+            Event Information
+        </div>
+
         <div class="card-body p-4">
             <p>@Model.Description</p>
 
@@ -27,16 +50,87 @@
                 <dd class="col-sm-8">@Model.EventType</dd>
             </dl>
 
-            <a asp-action="Edit"
-               asp-route-id="@Model.EventID"
-               class="btn btn-primary">
-                Edit Event
-            </a>
+            <div class="d-flex gap-2">
+                <a asp-action="Edit"
+                   asp-route-id="@Model.EventID"
+                   class="btn btn-primary">
+                    Edit Event
+                </a>
 
-            <a asp-action="Index"
-               class="btn btn-outline-secondary">
-                Back to Events
-            </a>
+                <a asp-action="Index"
+                   class="btn btn-outline-secondary">
+                    Back to Events
+                </a>
+            </div>
         </div>
     </div>
+
+    <!-- EVENT BANNER -->
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-dark text-white">
+            Event Banner
+        </div>
+
+        <div class="card-body p-4">
+
+            <p class="text-muted">
+                Upload a banner image for this event.
+                Supported formats: JPG, PNG and WEBP.
+                Maximum file size: 5 MB.
+            </p>
+
+            <!-- CURRENT BANNER PREVIEW -->
+            @if (!string.IsNullOrWhiteSpace(Model.BannerImageUrl))
+            {
+                <div class="mb-4">
+                    <img src="@Url.Action("Banner", "Events", new { id = Model.EventID })"
+                         alt="Banner for @Model.EventName"
+                         class="img-fluid rounded shadow-sm"
+                         style="width:100%; max-height:320px; object-fit:cover;" />
+                </div>
+
+                <div class="alert alert-success">
+                    An event banner is configured.
+                    You can upload another image to replace it.
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-secondary">
+                    No event banner has been uploaded yet.
+                </div>
+            }
+
+            <!-- UPLOAD FORM -->
+            <form asp-controller="Events"
+                  asp-action="UploadBanner"
+                  asp-route-id="@Model.EventID"
+                  method="post"
+                  enctype="multipart/form-data">
+
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label for="eventBanner"
+                           class="form-label">
+                        Choose Event Banner
+                    </label>
+
+                    <input type="file"
+                           id="eventBanner"
+                           name="file"
+                           class="form-control"
+                           accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                           required />
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary">
+                    Upload Event Banner
+                </button>
+            </form>
+
+        </div>
+    </div>
+
 </div>

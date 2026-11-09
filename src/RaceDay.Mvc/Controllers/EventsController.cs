@@ -256,4 +256,203 @@ public class EventsController : Controller
 			return RedirectToAction(nameof(Index));
 		}
 	}
+
+	[HttpPost]
+	[ValidateAntiForgeryToken]
+	[RequestSizeLimit(6 * 1024 * 1024)]
+	public async Task<IActionResult> UploadBanner(
+		int id,
+		IFormFile? file)
+	{
+		if (id <= 0)
+			return BadRequest();
+
+		if (file == null || file.Length == 0)
+		{
+			TempData["Error"] = "Please select an event banner.";
+			return RedirectToAction(nameof(Details), new { id });
+		}
+
+		if (file.Length > 5 * 1024 * 1024)
+		{
+			TempData["Error"] = "Banner must be 5 MB or smaller.";
+			return RedirectToAction(nameof(Details), new { id });
+		}
+
+		var allowedExtensions = new[]
+		{
+		".jpg", ".jpeg", ".png", ".webp"
+	};
+
+		var extension = Path.GetExtension(file.FileName)
+			.ToLowerInvariant();
+
+		if (!allowedExtensions.Contains(extension))
+		{
+			TempData["Error"] =
+				"Only JPG, PNG and WEBP images are supported.";
+
+			return RedirectToAction(nameof(Details), new { id });
+		}
+
+		try
+		{
+			// Verify the event belongs to the logged-in organiser.
+			using var eventResponse =
+				await _api.GetAsync($"api/events/{id}");
+
+			if (eventResponse.StatusCode == HttpStatusCode.NotFound)
+				return NotFound();
+
+			if (!eventResponse.IsSuccessStatusCode)
+				return await HandleFailureAsync(eventResponse.StatusCode);
+
+			var raceEvent = await eventResponse.Content
+				.ReadFromJsonAsync<RaceEvent>();
+
+			if (raceEvent == null)
+				return NotFound();
+
+			if (raceEvent.OrganiserID != CurrentUserId)
+				return Forbid();
+
+			// Forward the image to the RaceDay API.
+			using var form = new MultipartFormDataContent();
+			await using var stream = file.OpenReadStream();
+			using var fileContent = new StreamContent(stream);
+
+			var contentType = extension switch
+			{
+				".jpg" or ".jpeg" => "image/jpeg",
+				".png" => "image/png",
+				".webp" => "image/webp",
+				_ => "application/octet-stream"
+			};
+
+			fileContent.Headers.ContentType =
+				new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
+
+
+			form.Add(
+				fileContent,
+				"file",
+				Path.GetFileName(file.FileName));
+
+			using var request = new HttpRequestMessage(
+				HttpMethod.Post,
+				$"api/images/events/{id}/banner")
+			{
+				Content = form
+			};
+
+			using var response = await _api.SendAsync(request);
+
+			if (!response.IsSuccessStatusCode)
+			{
+				if (response.StatusCode == HttpStatusCode.Unauthorized ||
+					response.StatusCode == HttpStatusCode.Forbidden)
+				{
+					return await HandleFailureAsync(response.StatusCode);
+				}
+
+				TempData["Error"] =
+					"Banner upload failed. Check the API and Azurite.";
+
+				return RedirectToAction(nameof(Details), new { id });
+			}
+
+			TempData["Success"] =
+				"Event banner uploaded successfully.";
+
+			return RedirectToAction(nameof(Details), new { id });
+		}
+		catch (HttpRequestException ex)
+		{
+			_logger.LogError(
+				ex, "Unable to upload banner for event {Id}.", id);
+
+			TempData["Error"] = "RaceDay API is unavailable.";
+
+			return RedirectToAction(nameof(Details), new { id });
+		}
+	}
+
+	[HttpGet]
+	public async Task<IActionResult> Banner(int id)
+	{
+		if (id <= 0)
+			return BadRequest();
+
+		try
+		{
+			// Retrieve the event and verify organiser ownership.
+			using var eventResponse =
+				await _api.GetAsync($"api/events/{id}");
+
+			if (eventResponse.StatusCode == HttpStatusCode.NotFound)
+				return NotFound();
+
+			if (!eventResponse.IsSuccessStatusCode)
+			{
+				if (eventResponse.StatusCode == HttpStatusCode.Unauthorized)
+					return Unauthorized();
+
+				if (eventResponse.StatusCode == HttpStatusCode.Forbidden)
+					return Forbid();
+
+				return StatusCode((int)eventResponse.StatusCode);
+			}
+
+			var raceEvent = await eventResponse.Content
+				.ReadFromJsonAsync<RaceEvent>();
+
+			if (raceEvent == null)
+				return NotFound();
+
+			if (raceEvent.OrganiserID != CurrentUserId)
+				return Forbid();
+
+			if (string.IsNullOrWhiteSpace(raceEvent.BannerImageUrl))
+				return NotFound();
+
+			// Fetch the image through the authenticated API client.
+			using var response =
+				await _api.GetAsync($"api/images/events/{id}/banner");
+
+			if (response.StatusCode == HttpStatusCode.NotFound)
+				return NotFound();
+
+			if (response.StatusCode == HttpStatusCode.Unauthorized)
+				return Unauthorized();
+
+			if (response.StatusCode == HttpStatusCode.Forbidden)
+				return Forbid();
+
+			if (!response.IsSuccessStatusCode)
+				return StatusCode((int)response.StatusCode);
+
+			var contentType =
+				response.Content.Headers.ContentType?.MediaType;
+
+			if (contentType != "image/jpeg" &&
+				contentType != "image/png" &&
+				contentType != "image/webp")
+			{
+				return StatusCode(502);
+			}
+
+			var bytes = await response.Content.ReadAsByteArrayAsync();
+
+			return File(bytes, contentType);
+		}
+		catch (HttpRequestException ex)
+		{
+			_logger.LogError(
+				ex,
+				"Unable to retrieve banner for event {Id}.",
+				id);
+
+			return StatusCode(503);
+		}
+	}
 }

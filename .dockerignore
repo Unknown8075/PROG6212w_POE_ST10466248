@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+.git/
+.vs/
+.vscode/
+**/node_modules/
+**/TestResults/
+**/appsettings.Development.json
+**/serviceDependencies*.json
+**/secrets.json
+azurite-data/
+*.user
+*.suo

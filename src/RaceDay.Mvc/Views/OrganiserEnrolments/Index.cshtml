@@ -28,6 +28,7 @@
                             <th>Category</th>
                             <th>Enrolled On</th>
                             <th>Status</th>
+                            <th>Result</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -64,7 +65,25 @@
                                             @item.Status
                                         </span>
                                     </td>
-                                </tr>
+                                    <a asp-controller="OrganiserResults"
+                                       asp-action="Index"
+                                       asp-route-eventId="@ViewBag.EventID"
+                                       class="btn btn-primary mb-3">
+                                        View Race Results
+                                    </a>
+                                    <td>
+                                        @if (item.Status != "Cancelled")
+                                        {
+                                            <a asp-controller="OrganiserResults"
+                                               asp-action="Create"
+                                               asp-route-eventId="@item.EventID"
+                                               asp-route-enrolmentId="@item.EnrolmentID"
+                                               class="btn btn-sm btn-success">
+                                                Capture Result
+                                            </a>
+                                        }
+                                    </td>
+                                 </tr>
                             }
                         }
                     </tbody>

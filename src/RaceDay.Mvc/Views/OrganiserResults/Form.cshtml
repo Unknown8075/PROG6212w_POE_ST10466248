@@ -1,0 +1,90 @@
+@model RaceDay.Mvc.ViewModels.RaceResultFormViewModel
+
+@{
+    bool editing = Model.ResultID > 0;
+    ViewData["Title"] = editing ? "Edit Result" : "Capture Result";
+}
+
+<div class="container py-4">
+    <h1 class="fw-bold">@ViewData["Title"]</h1>
+
+    <p class="text-muted">
+        Enrolment #@Model.EnrolmentID
+    </p>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <form asp-action="Save" method="post">
+                @Html.AntiForgeryToken()
+
+                <input asp-for="EventID" type="hidden" />
+                <input asp-for="ResultID" type="hidden" />
+                <input asp-for="EnrolmentID" type="hidden" />
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="ResultStatus"
+                           class="form-label"></label>
+
+                    <select asp-for="ResultStatus"
+                            class="form-select">
+                        <option value="Finished">Finished</option>
+                        <option value="DNF">DNF - Did Not Finish</option>
+                        <option value="DNS">DNS - Did Not Start</option>
+                        <option value="DQ">DQ - Disqualified</option>
+                    </select>
+                    <span asp-validation-for="ResultStatus"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="FinishTimeText"
+                           class="form-label"></label>
+
+                    <input asp-for="FinishTimeText"
+                           class="form-control"
+                           placeholder="00:45:30" />
+
+                    <span asp-validation-for="FinishTimeText"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Position"
+                           class="form-label"></label>
+
+                    <input asp-for="Position"
+                           type="number"
+                           min="1"
+                           class="form-control" />
+
+                    <span asp-validation-for="Position"
+                          class="text-danger"></span>
+                </div>
+
+                <p class="text-muted small">
+                    For Finished, enter a time and position.
+                    For DNF, DNS or DQ, leave both fields blank.
+                    Saved results are immediately visible to participants.
+                </p>
+
+                <button type="submit" class="btn btn-primary">
+                    @(editing ? "Save Changes" : "Save & Publish Result")
+                </button>
+
+                <a asp-controller="OrganiserEnrolments"
+                   asp-action="Index"
+                   asp-route-eventId="@Model.EventID"
+                   class="btn btn-outline-secondary">
+                    Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

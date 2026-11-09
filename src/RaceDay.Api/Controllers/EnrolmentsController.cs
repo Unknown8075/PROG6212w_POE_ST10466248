@@ -213,6 +213,48 @@ public class EnrolmentsController : ControllerBase
 		});
 	}
 
+
+	// GET /api/enrolments/event/1
+	// Organisers can view enrolments for events they own.
+	[HttpGet("event/{eventId:int}")]
+	[Authorize(Roles = "Organiser")]
+	public async Task<IActionResult> GetEventEnrolments(int eventId)
+	{
+		int? organiserId = GetUserId();
+
+		if (organiserId == null)
+			return Unauthorized();
+
+		var raceEvent = await _context.Events
+			.AsNoTracking()
+			.FirstOrDefaultAsync(e => e.EventID == eventId);
+
+		if (raceEvent == null)
+			return NotFound(new { message = "Event not found." });
+
+		if (raceEvent.OrganiserID != organiserId.Value)
+			return Forbid();
+
+		var enrolments = await _context.Enrolments
+			.AsNoTracking()
+			.Where(e => e.EventCategory.EventID == eventId)
+			.OrderByDescending(e => e.EnrolmentDate)
+			.Select(e => new
+			{
+				e.EnrolmentID,
+				e.ParticipantID,
+				e.EventCategoryID,
+				e.EventCategory.EventID,
+				e.EventCategory.Category.CategoryName,
+				e.EnrolmentDate,
+				e.Status
+			})
+			.ToListAsync();
+
+		return Ok(enrolments);
+	}
+
+
 	private int? GetUserId()
 	{
 		var claim = User.FindFirstValue(

@@ -1,0 +1,86 @@
+@model List<RaceDay.Mvc.ViewModels.OrganiserRaceResult>
+
+@{
+    ViewData["Title"] = "Event Results";
+    int eventId = (int)ViewBag.EventID;
+}
+
+<div class="container py-4">
+    <h1 class="fw-bold">Race Results</h1>
+    <p class="text-muted">
+        View and update recorded finishing results.
+    </p>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Participant</th>
+                            <th>Enrolment</th>
+                            <th>Finish Time</th>
+                            <th>Position</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var result in Model)
+                        {
+                            <tr>
+                                <td>#@result.ParticipantID</td>
+                                <td>#@result.EnrolmentID</td>
+                                <td>
+                                    @(result.FinishTime?.ToString(@"hh\:mm\:ss") ?? "—")
+                                </td>
+                                <td>@(result.Position?.ToString() ?? "—")</td>
+                                <td>
+                                    <span class="badge bg-primary">
+                                        @result.ResultStatus
+                                    </span>
+                                </td>
+                                <td>
+                                    <a asp-action="Edit"
+                                       asp-route-eventId="@eventId"
+                                       asp-route-id="@result.ResultID"
+                                       class="btn btn-sm btn-outline-primary">
+                                        Edit
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">
+                    No race results have been recorded yet.
+                </div>
+            }
+        </div>
+    </div>
+
+    <a asp-controller="OrganiserEnrolments"
+       asp-action="Index"
+       asp-route-eventId="@eventId"
+       class="btn btn-outline-secondary mt-3">
+        Back to Enrolments
+    </a>
+</div>

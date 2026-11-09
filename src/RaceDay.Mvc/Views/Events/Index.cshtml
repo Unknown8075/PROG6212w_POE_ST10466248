@@ -84,6 +84,14 @@
                                                 Categories
                                             </a>
 
+                                            <a asp-controller="OrganiserEnrolments"
+                                               asp-action="Index"
+                                               asp-route-eventId="@item.EventID"
+                                               class="btn btn-sm btn-outline-primary">
+                                                Enrolments
+                                            </a>
+
+
                                             <form asp-action="Delete"
                                                   asp-route-id="@item.EventID"
                                                   method="post"

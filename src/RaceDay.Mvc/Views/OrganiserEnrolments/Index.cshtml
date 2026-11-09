@@ -1,0 +1,81 @@
+﻿@model List<RaceDay.Mvc.ViewModels.OrganiserEnrolmentViewModel>
+
+@{
+    ViewData["Title"] = "Event Enrolments";
+}
+
+<div class="container py-4">
+    <h1 class="fw-bold">Event Enrolments</h1>
+    <p class="text-muted">
+        View participants registered for this event.
+    </p>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Enrolment ID</th>
+                            <th>Participant ID</th>
+                            <th>Category</th>
+                            <th>Enrolled On</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="5">
+                                    No enrolments found for this event.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.EnrolmentID</td>
+                                    <td>@item.ParticipantID</td>
+                                    <td>@item.CategoryName</td>
+                                    <td>
+                                        @item.EnrolmentDate.ToString("dd MMM yyyy")
+                                    </td>
+                                    <td>
+                                        @{
+                                            var statusClass = item.Status switch
+                                            {
+                                                "Pending" => "bg-warning text-dark",
+                                                "Confirmed" => "bg-success",
+                                                "Cancelled" => "bg-danger",
+                                                _ => "bg-secondary"
+                                            };
+                                        }
+                                        <span class="badge @statusClass">
+                                            @item.Status
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <a asp-controller="Events"
+       asp-action="Index"
+       class="btn btn-outline-secondary mt-3">
+        Back to Events
+    </a>
+</div>

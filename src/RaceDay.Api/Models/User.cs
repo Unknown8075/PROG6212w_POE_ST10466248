@@ -22,7 +22,10 @@ public class User
     [Required, MaxLength(255)]
     public string PasswordHash { get; set; } = string.Empty;
 
-    [Required, MaxLength(20)]
+	[MaxLength(1000)]
+	public string? ProfilePictureUrl { get; set; }
+
+	[Required, MaxLength(20)]
     public string Role { get; set; } = "Participant";
 
     public DateTime DateCreated { get; set; } = DateTime.UtcNow;

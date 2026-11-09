@@ -29,6 +29,9 @@ public class Event
 	[Column(TypeName = "decimal(10,2)")]
 	public decimal Distance { get; set; }
 
+	[MaxLength(1000)]
+	public string? BannerImageUrl { get; set; }
+
 	[Required, MaxLength(20)]
 	public string EventType { get; set; } = "Run";
 

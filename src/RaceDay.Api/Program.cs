@@ -1,9 +1,9 @@
-
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RaceDay.Api.Data;
 using RaceDay.Api.Models;
+using RaceDay.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,6 +56,7 @@ builder.Services.AddAuthorization();
 // 6. Configure OpenAPI and Swagger
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<AzureBlobStorageService>();
 
 var app = builder.Build();
 

@@ -1,0 +1,59 @@
+@model List<RaceDay.Mvc.Models.ParticipantRaceResult>
+
+@{
+    ViewData["Title"] = "My Race Results";
+}
+
+<div class="container py-4">
+    <h1 class="fw-bold">My Race Results</h1>
+    <p class="text-muted">Your sporting performance history.</p>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Event</th>
+                    <th>Finish Time</th>
+                    <th>Position</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var result in Model)
+                {
+                    <tr>
+                        <td>@result.EventName</td>
+                        <td>
+                            @(result.FinishTime?.ToString(@"hh\:mm\:ss") ?? "—")
+                        </td>
+                        <td>
+                            @(result.Position?.ToString() ?? "—")
+                        </td>
+                        <td>
+                            <span class="badge @(result.ResultStatus == "Finished"
+                                                                  ? "bg-success" : "bg-secondary")">
+                                @result.ResultStatus
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            No race results have been published for you yet.
+        </div>
+    }
+
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        Back to My Enrolments
+    </a>
+</div>
